@@ -39,10 +39,20 @@
             #headshot {
                 width: auto;
                 height: 200px;
-                border-radius: 20%;
+                border-radius: 20px 0 0 20px;
                 border-style: solid;
+                border-width: 2px;
                 border-color: #a5c261;
-                margin-right: 30px;
+                border-right: black;
+                margin-right: -50px;
+                padding-right: 50px;
+            }
+            #logogfx {
+                border-radius: 0 20px 20px 0;
+                border-style: solid;
+                border-width: 2px;
+                border-color: #a5c261;
+                padding: 0 30px 0 30px;
             }
             .icons {
                 display: flex;
@@ -85,7 +95,10 @@
                 width: fit-content;
                 padding: 10px 15px 10px 15px;
                 border-radius: 20px;
-                color: white;
+                border-style: groove;
+                border-width: 1px;
+                border-color: black;
+                border-bottom-color: #a5c261;
                 text-decoration: none;
                 font-weight: bold;
                 margin: 50px 0 50px 0;
@@ -102,6 +115,10 @@
                 width: 80%;
                 padding: 10px;
                 border-radius: 20px;
+                border-style: groove;
+                border-width: 1px;
+                border-color: black;
+                border-bottom-color: #ca7831;
                 color: white;
                 text-decoration: none;
                 font-weight: bold;
@@ -149,10 +166,16 @@
             .projectimages, .forestslide, .javaslide, .papaslide {
                 width: 100%;
                 height: auto;
+                border-style: groove;
+                border-width: 1px;
+                border-color: #9976a9;
             }
             .pigslide {
                 width: 50%;
                 height: auto;
+                border-style: groove;
+                border-width: 1px;
+                border-color: #9976a9;
             }
             .imagetd {
                 width: 40%;
@@ -172,6 +195,10 @@
                 width: fit-content;
                 padding: 10px 15px 10px 15px;
                 border-radius: 20px;
+                border-style: groove;
+                border-width: 1px;
+                border-color: black;
+                border-bottom-color: #9976a9;
                 color: white;
                 text-decoration: none;
                 font-weight: bold;
@@ -187,10 +214,25 @@
                 width: fit-content;
                 padding: 10px 15px 10px 15px;
                 border-radius: 20px;
+                border-style: groove;
+                border-width: 1px;
+                border-color: black;
+                border-bottom-color: #9976a9;
                 color: white;
                 text-decoration: none;
                 font-weight: bold;
                 margin: 10px 0 10px 0;
+            }
+            button {
+                background-color: #9976a9;
+                color: white;
+                text-decoration: none;
+                font-weight: bold;
+            }
+            .video {
+                border-style: groove;
+                border-width: 1px;
+                border-color: #a5c261;
             }
         </style>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -271,7 +313,7 @@
     <center>
         <div class="logo">
             <img id="headshot" src="Images/Headshot.jpg?v=<?php echo time(); ?>" alt="Headshot">
-            <img src="Images/Logo.jpg?v=<?php echo time(); ?>" alt="Logo">
+            <img id="logogfx" src="Images/Logo.jpg?v=<?php echo time(); ?>" alt="Logo">
         </div>
         <hr style="margin-top: 40px;">
         <div class="icons">
@@ -640,7 +682,7 @@
                     </td>
                     <td class="imagetd">
                         <div>
-                            <div id="player1"></div>
+                            <div class="video" id="player1"></div>
                         </div>
                     </td>
                 </tr>
@@ -662,7 +704,7 @@
                     </td>
                     <td class="imagetd">
                         <div>
-                            <div id="player2"></div>
+                            <div class="video" id="player2"></div>
                         </div>
                     </td>
                 </tr>
@@ -690,13 +732,13 @@
                     </td>
                     <td class="imagetd">
                         <div>
-                            <div id="player3"></div>
+                            <div class="video" id="player3"></div>
                         </div>
                     </td>
                 </tr>
                 <td class="imagetd">
                     <div>
-                        <div id="player4"></div>
+                        <div class="video" id="player4"></div>
                     </div>
                 </td>
             </table>
@@ -717,7 +759,7 @@
                     </td>
                     <td class="imagetd">
                         <div>
-                            <div id="player5"></div>
+                            <div class="video" id="player5"></div>
                         </div>
                     </td>
                 </tr>
