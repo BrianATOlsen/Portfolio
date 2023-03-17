@@ -1,0 +1,460 @@
+The user interface consists of a text input box where the user can enter their text, a drop-down menu to select the translation language, and a "Translate" button. When the user clicks the "Translate" button, the front-end sends a request to the back-end API, which handles the translation logic and returns the translated text. The translated text is then displayed on the front-end.
+
+The back-end API is built using C# and the ASP.NET framework and consists of two controllers, one for each translation language. Each controller handles incoming requests and calls the appropriate translation logic to perform the translation. The translation logic is implemented using classes and interfaces to ensure extensibility and maintainability. The program uses object-oriented principles to separate concerns and promote code reuse.
+
+
+****************************************************************************************************************
+TranslatorForm.cs
+
+This is a C# code for a Pig Latin translator program that utilizes Windows Forms.
+
+The program consists of a form with radio buttons to select the language to translate to, a textbox to input text, a button to initiate the translation, a label to display the type of translation, and a textbox to output the translated text.
+
+The CheckRadioButtons method is used to check which radio button is checked and change the label text accordingly. The btnClear_Click method is used to clear the input and output textboxes, while the btnExit_Click method is used to close the form.
+
+The btnTranslate_Click method is the main function of the program. It takes the input text, splits it into an array of words, and creates a list of objects to store the translated words. Depending on the radio button selected, it creates an instance of either the PigLatinTranslator or PigGreekTranslator class, which implements the ITranslator interface. The Translate method is called on the translator object, which returns the translated word as a string. The translated word is then added to the output array as an object.
+
+Finally, the output array is looped through, and the ToString method is called on each object to convert it to a string. The strings are concatenated together with a space and assigned to the output textbox.
+
+******************************************************************************************************************
+
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
+namespace PigTranslator
+{
+    public partial class TranslatorForm : Form
+    {
+        public TranslatorForm()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rdoLatin_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckRadioButtons();
+        }
+
+        private void rdoGreek_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckRadioButtons();
+        }
+        
+        public void CheckRadioButtons()
+        {
+            if (rdoLatin.Checked)
+            {
+                lblTranslation.Text = "Pig Latin translation:";
+                btnTranslate.Focus();
+                txtOutput.Clear();
+            }
+            if (rdoGreek.Checked)
+            {
+                lblTranslation.Text = "Pig Greek translation:";
+                btnTranslate.Focus();
+                txtOutput.Clear();
+            }
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            txtInput.Clear();
+            txtOutput.Clear();
+            txtInput.Focus();
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void btnTranslate_Click(object sender, EventArgs e)
+        {
+            //Input text to array
+            string inputText = txtInput.Text;
+            string[] inputArray = inputText.Split(' ');
+
+            //Create Object array to store text as objects
+            List<object> outputArray = new();
+
+            //Determine language, covert to language object, add to object list. Call translate function
+            if (rdoLatin.Checked)
+            {
+                //foreach (string word in fixedArray)
+                foreach (string word in inputArray)
+                {
+                    ITranslator l = new PigLatinTranslator(word);
+                    l.Translate();
+                    outputArray.Add(l);
+                }
+            }
+            if (rdoGreek.Checked)
+            {
+                foreach (string word in inputArray)
+                {
+                    ITranslator g = new PigGreekTranslator(word);
+                    g.Translate();
+                    outputArray.Add(g);
+                }
+            }
+            
+            //Output array to text
+            string outputText = "";
+            foreach (var word in outputArray)
+            {
+                outputText += word.ToString() + " ";
+            }
+            txtOutput.Text = outputText;
+        }
+    }
+}
+
+****************************************************************************************************************
+ITranslator.cs
+
+This code appears to be a partial implementation of an interface for a Pig Latin translator. The interface defines several properties and methods that must be implemented by any class that implements this interface. The methods in this interface include:
+
+Translate(): This method is responsible for translating a single word into Pig Latin. It first checks whether the CurrentWord property is null or empty, and returns immediately if it is. Otherwise, it calls the Punctuation() and NeedTranslationQuery() methods to determine whether the word needs to be translated. If the word does not need to be translated, it calls the ReApplyPunctuation() method to add any previously removed punctuation back to the word. If the word does need to be translated, it determines the case of the word using the DetermineCase() method, then determines the correct arrangement of the word using the DetermineArrangement() method. Finally, it calls the ReApplyPunctuation() method to add back any previously removed punctuation.
+
+Punctuation(string input): This method takes a word as input, and removes any punctuation at the end of the word. It does this by checking the last character of the word using a regular expression, and if it is punctuation, it removes it and calls itself recursively to remove any additional punctuation.
+
+NeedTranslationQuery(string input): This method takes a word as input, and determines whether it needs to be translated into Pig Latin. It does this by checking whether the word contains only letters and apostrophes using a regular expression.
+
+DetermineCase(string input): This method takes a word as input, and determines whether it is in title case (i.e. the first letter is uppercase and the second letter is lowercase).
+
+DetermineArrangement(string input): This method takes a word as input, and determines the correct arrangement of the word in Pig Latin. If the word starts with a vowel or "y", it calls VowelLogicTermination() to handle the case where the word should be translated with "way" at the end. Otherwise, it calls ConsLogic() to handle the case where the word should be translated with its initial consonant sound at the end, followed by "ay".
+
+ReApplyPunctuation(): This method adds any previously removed punctuation back to the word, and stores the resulting translated word in the FinalOutput property. If no punctuation was removed, it simply adds the translated word to the FinalOutput property.
+
+************************************************************************************************************************
+
+using System.Text.RegularExpressions;
+
+namespace PigTranslator
+{
+    public interface ITranslator
+    {
+        string CurrentWord { get; set; }
+        string FinalOutput { get; set; }
+        bool NeedsTranslation { get; set; }
+        string EndPunctuation { get; set; }
+        bool IsTitleCase { get; set; }
+
+        void Translate()
+        {
+            if (string.IsNullOrEmpty(CurrentWord))
+            {
+                return;
+            }
+            else
+            {
+                Punctuation(CurrentWord);
+                NeedTranslationQuery(CurrentWord);
+                if (NeedsTranslation == false)
+                {
+                    ReApplyPunctuation();
+                }
+                else
+                {
+                    if (CurrentWord.Length == 1)
+                    {
+                        DetermineArrangement(CurrentWord);
+                        ReApplyPunctuation();
+                        return;
+                    }
+                    else
+                    {
+                        DetermineCase(CurrentWord);
+                        DetermineArrangement(CurrentWord);
+                        ReApplyPunctuation();
+                    }
+                }
+            }
+        }
+
+        void Punctuation(string input)
+        {
+            string punctuationPattern = @"[!#\$%&()*+,-./:;<=>?@[\]^_`{|}~]";
+            string lastChar;
+            int count = 0;
+
+            foreach (char c in input)
+            {
+                count++;
+            }
+
+            if (count < 1)
+            {
+                lastChar = input.Substring(input.Length);
+            }
+            else
+            {
+                lastChar = input.Substring(input.Length - 1);
+            }
+
+            if (Regex.IsMatch(lastChar, punctuationPattern, RegexOptions.IgnoreCase))
+            {
+                EndPunctuation = lastChar + EndPunctuation;
+                string manipulatedString = input.Remove(input.Length - 1);
+                CurrentWord = manipulatedString;
+                Punctuation(CurrentWord); //Recurion to remove multiple punctuation
+            }
+            else
+            {
+                CurrentWord = input;
+            }
+        }
+
+        void NeedTranslationQuery(string input)
+        {
+            string needTranslationPattern = @"^[A-Za-z']+$";
+
+            if (Regex.IsMatch(input, needTranslationPattern, RegexOptions.IgnoreCase))
+            {
+                NeedsTranslation = true;
+            }
+            else
+            {
+                NeedsTranslation = false;
+            }
+        }
+
+        void DetermineCase(string input)
+        {
+            string firstChar = input.Substring(0, 1);
+            string secondChar = input.Substring(1, 1);
+            string upperCasePattern = @"^[A-Z]+$";
+            string lowerCasePattern = @"^[a-z]+$";
+
+            if (Regex.IsMatch(firstChar, upperCasePattern))
+            {
+                if (Regex.IsMatch(secondChar, lowerCasePattern))
+                {
+                    IsTitleCase = true;
+                }
+            }
+        }
+
+        void DetermineArrangement(string input)
+        {
+            char[] yStart = { 'y', 'Y' };
+            char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' };
+
+            if (input.IndexOfAny(yStart) == 0)
+            {
+                ConsLogic(input);
+                return;
+            }
+            else if (input.IndexOfAny(vowels) == 0)
+            {
+                VowelLogicTermination();
+                return;
+            }
+            else
+            {
+                ConsLogic(input);
+                return;
+            }
+        }
+
+        void VowelLogicTermination(){}
+
+        void ConsLogic(string input){}
+        
+        void ReApplyPunctuation()
+        {
+            if (EndPunctuation != "")
+            {
+                FinalOutput += (CurrentWord + EndPunctuation);
+            }
+            else
+            {
+                FinalOutput += CurrentWord;
+            }
+        }
+    }
+}           
+
+****************************************************************************************************************
+PigGreekTranslator.cs
+
+These are two classes in the PigTranslator namespace that implement the ITranslator interface for translating text into Pig Greek and Pig Latin.
+
+Both classes have the same properties: CurrentWord, FinalOutput, NeedsTranslation, EndPunctuation, and IsTitleCase. CurrentWord is the current word being translated, FinalOutput is the final output of the translation, NeedsTranslation is a boolean value indicating whether the word needs to be translated, EndPunctuation is the punctuation at the end of the word, and IsTitleCase indicates whether the word is in title case or not.
+
+Both classes have three constructors: one that initializes all properties, one that initializes only the CurrentWord property, and a default constructor that initializes all properties to their default values.
+
+Both classes have the same ConsLogic method that translates a word that starts with a consonant, and both have the same VowelLogicTermination method that handles words that end in a vowel.
+
+The PigGreekTranslator class translates words into Pig Greek by adding "omatos" to the end of words that start with a consonant, or by moving the first consonant cluster to the end of words that start with a vowel, and then adding "omatos". If a word is in title case, the translated word will start with an uppercase letter.
+
+The PigLatinTranslator class translates words into Pig Latin by adding "ay" to the end of words that start with a consonant, or by moving the first consonant cluster to the end of words that start with a vowel, and then adding "ay". If a word is in title case, the translated word will start with an uppercase letter and "ay" will also be capitalized.
+
+*******************************************************************************************************************
+
+namespace PigTranslator
+{
+    public class PigGreekTranslator : ITranslator
+    {
+        public string CurrentWord { get; set; } = "";
+        public string FinalOutput { get; set; } = "";
+        public bool NeedsTranslation { get; set; } = true;
+        public string EndPunctuation { get; set; } = "";
+        public bool IsTitleCase { get; set; } = false;
+
+        public PigGreekTranslator(string currentWord, string finalOutput, bool needsTranslation, string endPunctuation, bool isTitleCase)
+        {
+            this.CurrentWord = currentWord;
+            this.FinalOutput = finalOutput;
+            this.NeedsTranslation = needsTranslation;
+            this.EndPunctuation = endPunctuation;
+            this.IsTitleCase = isTitleCase;
+        }
+        public PigGreekTranslator(string currentWord)
+        {
+            CurrentWord = currentWord.Trim();
+        }
+
+        public PigGreekTranslator()
+        {
+        }
+
+        // Global variables
+        public char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' };
+
+        public void ConsLogic(string input)
+        {
+            if (input.Length == 1)
+            {
+                string output = input + "omatos";
+                CurrentWord = output;
+                return;
+            }
+            if (input.IndexOfAny(vowels) == -1)
+            {
+                string output = CurrentWord + "omatos";
+                CurrentWord = output;
+                return;
+            }
+            else
+            {
+                int vowelIndex = input.IndexOfAny(vowels, 1);
+                string preVowel = input.Substring(0, vowelIndex);
+                string postVowel = input.Substring(vowelIndex);
+
+                if (IsTitleCase == true)
+                {
+                    string tempPreVowel = preVowel.Substring(0).ToLower();
+                    string tempPostVowel = postVowel.Substring(0, 1).ToUpper() + postVowel.Substring(1);
+                    string newoutput = tempPostVowel + tempPreVowel + "omatos";
+                    CurrentWord = newoutput;
+                    return;
+                }
+                else
+                {
+                    string output = postVowel + preVowel + "omatos";
+                    CurrentWord = output;
+                    return;
+                }
+            }
+        }
+
+        public void VowelLogicTermination()
+        {
+            CurrentWord += "oi";
+        }
+
+        public override string ToString()
+        {
+            return FinalOutput;
+        }
+    }
+}
+
+****************************************************************************************************************
+PigLatinTranslator.cs
+
+namespace PigTranslator
+{
+    public class PigLatinTranslator : ITranslator
+    {
+        public string CurrentWord { get; set; } = "";
+        public string FinalOutput { get; set; } = "";
+        public bool NeedsTranslation { get; set; } = true;
+        public string EndPunctuation { get; set; } = "";
+        public bool IsTitleCase { get; set; } = false;
+
+        public PigLatinTranslator(string currentWord, string finalOutput, bool needsTranslation, string endPunctuation, bool isTitleCase)
+        {
+            this.CurrentWord = currentWord;
+            this.FinalOutput = finalOutput;
+            this.NeedsTranslation = needsTranslation;
+            this.EndPunctuation = endPunctuation;
+            this.IsTitleCase = isTitleCase;
+        }
+        public PigLatinTranslator(string currentWord)
+        {
+            CurrentWord = currentWord.Trim();
+        }
+
+        public PigLatinTranslator()
+        {
+        }
+
+        // Global variables
+        public char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y' };
+
+        public void ConsLogic(string input)
+        {
+            if (input.Length == 1)
+            {
+                string output = input + "ay";
+                CurrentWord = output;
+                return;
+            }
+            if (input.IndexOfAny(vowels) == -1)
+            {
+                string output = CurrentWord + "ay";
+                CurrentWord = output;
+                return;
+            }
+            else
+            {
+                int vowelIndex = input.IndexOfAny(vowels, 1);
+                string preVowel = input.Substring(0, vowelIndex);
+                string postVowel = input.Substring(vowelIndex);
+
+                if (IsTitleCase == true)
+                {
+                    string tempPreVowel = preVowel.Substring(0).ToLower();
+                    string tempPostVowel = postVowel.Substring(0, 1).ToUpper() + postVowel.Substring(1);
+                    string newoutput = tempPostVowel + tempPreVowel + "ay";
+                    CurrentWord = newoutput;
+                    return;
+                }
+                else
+                {
+                    string output = postVowel + preVowel + "ay";
+                    CurrentWord = output;
+                    return;
+                }
+            }
+        }
+    
+        public void VowelLogicTermination()
+        {
+            CurrentWord += "way";
+        }
+             
+        public override string ToString()
+        {
+            return FinalOutput;
+        }
+    }
+}
